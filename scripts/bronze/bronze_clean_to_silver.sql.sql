@@ -1,4 +1,4 @@
-
+-- checking for null / duplicate in primary key
 select
 cst_id,
 COUNT(*) 
