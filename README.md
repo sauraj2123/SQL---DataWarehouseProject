@@ -8,9 +8,9 @@ This project demonstrates a comprehensive data warehousing and analytics solutio
 ## 🏗️ Data Architecture
 
 The data architecture for this project follows Medallion Architecture **Bronze**, **Silver**, and **Gold** layers:
-![Data Architecture](docs/data_architecture.png)
+![Data Architecture](docs/figures/data_architecture.png)
 
-1. **Bronze Layer**: Stores raw data as-is from the source systems. Data is ingested from CSV Files into SQL Server Database.
+1. **Bronze Layer**: Stores raw data as-is from the source systems. Data is ingested from CSV files into a PostgreSQL database.
 2. **Silver Layer**: This layer includes data cleansing, standardization, and normalization processes to prepare data for analysis.
 3. **Gold Layer**: Houses business-ready data modeled into a star schema required for reporting and analytics.
 
@@ -39,7 +39,7 @@ This project involves:
 ### Building the Data Warehouse (Data Engineering)
 
 #### Objective
-Develop a modern data warehouse using SQL Server to consolidate sales data, enabling analytical reporting and informed decision-making.
+Develop a modern data warehouse using PostgreSQL to consolidate sales data, enabling analytical reporting and informed decision-making.
 
 #### Specifications
 - **Data Sources**: Import data from two source systems (ERP and CRM) provided as CSV files.
@@ -60,34 +60,57 @@ Develop SQL-based analytics to deliver detailed insights into:
 
 These insights empower stakeholders with key business metrics, enabling strategic decision-making.  
 
-For more details, refer to [docs/requirements.md](docs/requirements.md).
+For more details, see the [data catalog](docs/data_catalog.md) and [naming conventions](docs/naming_conventions.md).
 
+---
+## 🗺️ Data Model (Gold Layer)
+
+![Data Model](docs/figures/data_model.png)
+
+More diagrams: [data flow](docs/figures/data_flow.png), [data integration](docs/figures/data_integration.png), [ETL methods](docs/figures/ETL.png).
+
+---
+## ▶️ How to Run (PostgreSQL)
+
+1. Put the CSV files where the PostgreSQL server can read them (default: `/Users/Shared/datasets/source_crm` and `/Users/Shared/datasets/source_erp`), or edit the paths in `scripts/bronze/proc_load_bronze.sql`.
+2. Run the scripts in this order:
+
+```bash
+psql -U postgres -d postgres      -f scripts/init_database.sql
+psql -U postgres -d datawarehouse -f scripts/bronze/ddl_bronze.sql
+psql -U postgres -d datawarehouse -f scripts/bronze/proc_load_bronze.sql
+psql -U postgres -d datawarehouse -f scripts/silver/ddl_silver.sql
+psql -U postgres -d datawarehouse -f scripts/silver/proc_load_silver.sql
+psql -U postgres -d datawarehouse -c "CALL bronze.load_bronze();"
+psql -U postgres -d datawarehouse -c "CALL silver.load_silver();"
+psql -U postgres -d datawarehouse -f scripts/gold/ddl_gold.sql
+```
+
+3. Check data quality with `tests/quality_checks_silver.sql` and `tests/quality_checks_gold.sql`.
+
+---
 ## 📂 Repository Structure
 ```
-data-warehouse-project/
+SQL---DataWarehouseProject/
 │
 ├── datasets/                           # Raw datasets used for the project (ERP and CRM data)
 │
-├── docs/                               # Project documentation and architecture details
-│   ├── etl.drawio                      # Draw.io file shows all different techniquies and methods of ETL
-│   ├── data_architecture.drawio        # Draw.io file shows the project's architecture
-│   ├── data_catalog.md                 # Catalog of datasets, including field descriptions and metadata
-│   ├── data_flow.drawio                # Draw.io file for the data flow diagram
-│   ├── data_models.drawio              # Draw.io file for data models (star schema)
-│   ├── naming-conventions.md           # Consistent naming guidelines for tables, columns, and files
+├── docs/                               # Project documentation
+│   ├── figures/                        # Diagrams as images (architecture, data flow, data model, ETL)
+│   ├── drawio/                         # Editable Draw.io sources for the diagrams
+│   ├── data_catalog.md                 # Gold layer tables and column descriptions
+│   ├── naming_conventions.md           # Naming rules for tables, columns and procedures
+│   └── data_layers.pdf                 # Overview of the Bronze / Silver / Gold layers
 │
-├── scripts/                            # SQL scripts for ETL and transformations
-│   ├── bronze/                         # Scripts for extracting and loading raw data
-│   ├── silver/                         # Scripts for cleaning and transforming data
-│   ├── gold/                           # Scripts for creating analytical models
+├── scripts/                            # PostgreSQL scripts
+│   ├── init_database.sql               # Creates the database and schemas
+│   ├── bronze/                         # Bronze tables + procedure to load CSV files
+│   ├── silver/                         # Silver tables + procedure to clean and load data
+│   ├── gold/                           # Gold star-schema views
+│   └── exploration/                    # Early working queries (data profiling, drafts) - not part of the pipeline
 │
-├── tests/                              # Test scripts and quality files
+├── tests/                              # Data quality checks for silver and gold
 │
 ├── README.md                           # Project overview and instructions
-├── LICENSE                             # License information for the repository
-├── .gitignore                          # Files and directories to be ignored by Git
-└── requirements.txt                    # Dependencies and requirements for the project
+└── LICENSE                             # License information
 ```
----
-
-
