@@ -86,7 +86,7 @@ SELECT
     -- 2nd position: cat_id
     REPLACE(SUBSTR(prd_key, 1, 5), '-', '_') as cat_id,
     -- 3rd position: prd_key
-    SUBSTR(prd_key, 7) as prd_key,
+    SUBSTRING(prd_key, 7) as prd_key,
     -- 4th position: prd_nm
     prd_nm,
     -- 5th position: prd_cost (now safely aligned with COALESCE returning an int)
